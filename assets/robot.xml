@@ -1,0 +1,213 @@
+<mujoco model="SpotMicroAI_mesh_only">
+  <compiler angle="radian" coordinate="local" inertiafromgeom="true" meshdir="meshes"/>
+  <option timestep="0.002" gravity="0 0 -9.81" integrator="RK4"/>
+  <size njmax="4000" nconmax="2000"/>
+
+  <default>
+    <joint damping="0.6" armature="0.01" limited="true"/>
+    <geom friction="1.0 0.005 0.0001" solref="0.02 1" solimp="0.9 0.95 0.001"/>
+  </default>
+
+  <asset>
+    <!-- Meshes: filenames match your URDF -->
+    <mesh name="mainbody"    file="mainbody.stl"    scale="0.001 0.001 0.001"/>
+    <mesh name="backpart"    file="backpart.stl"    scale="0.001 0.001 0.001"/>
+    <mesh name="frontpart"   file="frontpart.stl"   scale="0.001 0.001 0.001"/>
+
+    <mesh name="lshoulder"   file="lshoulder.stl"   scale="0.001 0.001 0.001"/>
+    <mesh name="rshoulder"   file="rshoulder.stl"   scale="0.001 0.001 0.001"/>
+
+    <mesh name="larm_cover"  file="larm_cover.stl"  scale="0.001 0.001 0.001"/>
+    <mesh name="rarm_cover"  file="rarm_cover.stl"  scale="0.001 0.001 0.001"/>
+
+    <mesh name="larm"        file="larm.stl"        scale="0.001 0.001 0.001"/>
+    <mesh name="rarm"        file="rarm.stl"        scale="0.001 0.001 0.001"/>
+
+    <mesh name="lfoot"       file="lfoot.stl"       scale="0.001 0.001 0.001"/>
+    <mesh name="rfoot"       file="rfoot.stl"       scale="0.001 0.001 0.001"/>
+
+    <mesh name="foot"        file="foot.stl"        scale="0.001 0.001 0.001"/>
+
+    <material name="yellow" rgba="0.92 0.83 0.0 1"/>
+    <material name="black"  rgba="0.10 0.10 0.10 1"/>
+    <material name="grey"   rgba="0.60 0.60 0.60 1"/>
+  </asset>
+
+  <worldbody>
+    <light pos="0 0 2" dir="0 0 -1"/>
+    <geom name="floor" type="plane" size="5 5 0.1" rgba="0.92 0.92 0.92 1"/>
+
+    <body name="base_link" pos="0 0 0.30">
+      <freejoint/>
+
+      <!-- base_inertia visual -->
+      <geom name="base_inertia_vis" type="mesh" mesh="mainbody"
+            pos="0.0425 0.055 -0.02" euler="0 0 3.1416"
+            material="black"/>
+
+      <!-- rear_link visual -->
+      <geom name="rear_link_vis" type="mesh" mesh="backpart"
+            pos="0.042 0.055 -0.0195" euler="0 0 3.1416"
+            material="yellow"/>
+
+      <!-- front_link visual -->
+      <geom name="front_link_vis" type="mesh" mesh="frontpart"
+            pos="0.042 0.055 -0.0205" euler="0 0 3.1416"
+            material="yellow"/>
+
+      <!-- ================= FRONT LEFT ================= -->
+      <body name="front_left_shoulder_link" pos="0.093 0.0395 0">
+        <joint name="front_left_shoulder" type="hinge" axis="1 0 0" range="-0.548 0.548"/>
+
+        <geom name="fl_shoulder_vis" type="mesh" mesh="lshoulder"
+              pos="0.135 0.0163 -0.0195" euler="0 0 3.1416"
+              material="black"/>
+
+        <body name="front_left_leg_link" pos="0 0.055 0">
+          <joint name="front_left_leg" type="hinge" axis="0 1 0" range="-2.666 1.548"/>
+
+          <geom name="fl_arm_vis" type="mesh" mesh="larm"
+                pos="0.134 -0.04 -0.0095" euler="0 0 3.1416"
+                material="black"/>
+          <geom name="fl_arm_cover_vis" type="mesh" mesh="larm_cover"
+                pos="0.134 -0.04 -0.0095" euler="0 0 3.1416"
+                material="yellow"/>
+
+          <body name="front_left_foot_link" pos="0.014 0 -0.109">
+            <joint name="front_left_foot" type="hinge" axis="0 1 0" range="-2.59 0.1"/>
+
+            <geom name="fl_shin_vis" type="mesh" mesh="lfoot"
+                  pos="0.1195 -0.04 0.099" euler="0 0 3.1416"
+                  material="black"/>
+
+            <body name="front_left_toe_link" pos="0 0 -0.13">
+              <geom name="fl_toe_vis" type="mesh" mesh="foot"
+                    pos="0 -0.01 0.015" euler="0 0.40010 0"
+                    material="grey"/>
+            </body>
+          </body>
+        </body>
+      </body>
+
+      <!-- ================= FRONT RIGHT ================= -->
+      <body name="front_right_shoulder_link" pos="0.093 -0.0395 0">
+        <joint name="front_right_shoulder" type="hinge" axis="1 0 0" range="-0.548 0.548"/>
+
+        <geom name="fr_shoulder_vis" type="mesh" mesh="rshoulder"
+              pos="0.135 0.0938 -0.0205" euler="0 0 3.1416"
+              material="black"/>
+
+        <body name="front_right_leg_link" pos="0 -0.055 0">
+          <joint name="front_right_leg" type="hinge" axis="0 1 0" range="-2.666 1.548"/>
+
+          <geom name="fr_arm_vis" type="mesh" mesh="rarm"
+                pos="0.134 0.149 -0.0095" euler="0 0 3.1416"
+                material="black"/>
+          <geom name="fr_arm_cover_vis" type="mesh" mesh="rarm_cover"
+                pos="0.134 0.149 -0.0095" euler="0 0 3.1416"
+                material="yellow"/>
+
+          <body name="front_right_foot_link" pos="0.014 0 -0.109">
+            <joint name="front_right_foot" type="hinge" axis="0 1 0" range="-2.59 0.1"/>
+
+            <geom name="fr_shin_vis" type="mesh" mesh="rfoot"
+                  pos="0.1195 0.149 0.099" euler="0 0 3.1416"
+                  material="black"/>
+
+            <body name="front_right_toe_link" pos="0 0 -0.13">
+              <geom name="fr_toe_vis" type="mesh" mesh="foot"
+                    pos="0 -0.01 0.015" euler="0 0.40010 0"
+                    material="grey"/>
+            </body>
+          </body>
+        </body>
+      </body>
+
+      <!-- ================= REAR LEFT ================= -->
+      <body name="rear_left_shoulder_link" pos="-0.093 0.0395 0">
+        <joint name="rear_left_shoulder" type="hinge" axis="1 0 0" range="-0.548 0.548"/>
+
+        <geom name="rl_shoulder_vis" type="mesh" mesh="lshoulder"
+              pos="0.135 0.0163 -0.0195" euler="0 0 3.1416"
+              material="black"/>
+
+        <body name="rear_left_leg_link" pos="0 0.055 0">
+          <joint name="rear_left_leg" type="hinge" axis="0 1 0" range="-2.666 1.548"/>
+
+          <geom name="rl_arm_vis" type="mesh" mesh="larm"
+                pos="0.134 -0.04 -0.0095" euler="0 0 3.1416"
+                material="black"/>
+          <geom name="rl_arm_cover_vis" type="mesh" mesh="larm_cover"
+                pos="0.134 -0.04 -0.0095" euler="0 0 3.1416"
+                material="yellow"/>
+
+          <body name="rear_left_foot_link" pos="0.014 0 -0.109">
+            <joint name="rear_left_foot" type="hinge" axis="0 1 0" range="-2.59 0.1"/>
+
+            <geom name="rl_shin_vis" type="mesh" mesh="lfoot"
+                  pos="0.1195 -0.04 0.099" euler="0 0 3.1416"
+                  material="black"/>
+
+            <body name="rear_left_toe_link" pos="0 0 -0.13">
+              <geom name="rl_toe_vis" type="mesh" mesh="foot"
+                    pos="0 -0.01 0.015" euler="0 0.40010 0"
+                    material="grey"/>
+            </body>
+          </body>
+        </body>
+      </body>
+
+      <!-- ================= REAR RIGHT ================= -->
+      <body name="rear_right_shoulder_link" pos="-0.093 -0.0395 0">
+        <joint name="rear_right_shoulder" type="hinge" axis="1 0 0" range="-0.548 0.548"/>
+
+        <geom name="rr_shoulder_vis" type="mesh" mesh="rshoulder"
+              pos="0.135 0.0938 -0.0205" euler="0 0 3.1416"
+              material="black"/>
+
+        <body name="rear_right_leg_link" pos="0 -0.055 0">
+          <joint name="rear_right_leg" type="hinge" axis="0 1 0" range="-2.666 1.548"/>
+
+          <geom name="rr_arm_vis" type="mesh" mesh="rarm"
+                pos="0.134 0.149 -0.0095" euler="0 0 3.1416"
+                material="black"/>
+          <geom name="rr_arm_cover_vis" type="mesh" mesh="rarm_cover"
+                pos="0.134 0.149 -0.0095" euler="0 0 3.1416"
+                material="yellow"/>
+
+          <body name="rear_right_foot_link" pos="0.014 0 -0.109">
+            <joint name="rear_right_foot" type="hinge" axis="0 1 0" range="-2.59 0.1"/>
+
+            <geom name="rr_shin_vis" type="mesh" mesh="rfoot"
+                  pos="0.1195 0.149 0.099" euler="0 0 3.1416"
+                  material="black"/>
+
+            <body name="rear_right_toe_link" pos="0 0 -0.13">
+              <geom name="rr_toe_vis" type="mesh" mesh="foot"
+                    pos="0 -0.01 0.015" euler="0 0.40010 0"
+                    material="grey"/>
+            </body>
+          </body>
+        </body>
+      </body>
+
+    </body>
+  </worldbody>
+
+  <actuator>
+    <position name="p_fl_shoulder" joint="front_left_shoulder"  kp="60" ctrlrange="-0.548 0.548"/>
+    <position name="p_fr_shoulder" joint="front_right_shoulder" kp="60" ctrlrange="-0.548 0.548"/>
+    <position name="p_rl_shoulder" joint="rear_left_shoulder"   kp="60" ctrlrange="-0.548 0.548"/>
+    <position name="p_rr_shoulder" joint="rear_right_shoulder"  kp="60" ctrlrange="-0.548 0.548"/>
+
+    <position name="p_fl_hip" joint="front_left_leg"  kp="80" ctrlrange="-2.666 1.548"/>
+    <position name="p_fr_hip" joint="front_right_leg" kp="80" ctrlrange="-2.666 1.548"/>
+    <position name="p_rl_hip" joint="rear_left_leg"   kp="80" ctrlrange="-2.666 1.548"/>
+    <position name="p_rr_hip" joint="rear_right_leg"  kp="80" ctrlrange="-2.666 1.548"/>
+
+    <position name="p_fl_knee" joint="front_left_foot"  kp="80" ctrlrange="-2.59 0.1"/>
+    <position name="p_fr_knee" joint="front_right_foot" kp="80" ctrlrange="-2.59 0.1"/>
+    <position name="p_rl_knee" joint="rear_left_foot"   kp="80" ctrlrange="-2.59 0.1"/>
+    <position name="p_rr_knee" joint="rear_right_foot"  kp="80" ctrlrange="-2.59 0.1"/>
+  </actuator>
+</mujoco>
