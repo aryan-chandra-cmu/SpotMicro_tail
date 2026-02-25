@@ -1,6 +1,6 @@
 # SpotMicro Tail – Bio-Inspired Tail Stabilization for Quadruped Locomotion
 
-![Image](https://drive.google.com/file/d/1Vcfd1dIPPc8JiihfI15v5Qrfnt6stJdU/view?usp=drive_link)
+![Image](https://drive.google.com/file/d/1Vcfd1dIPPc8JiihfI15v5Qrfnt6stJdU/view?usp=sharing)
 
 
 Repository: [https://github.com/aryan-chandra-cmu/SpotMicro_tail](https://github.com/aryan-chandra-cmu/SpotMicro_tail)
