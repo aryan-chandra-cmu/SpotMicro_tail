@@ -73,8 +73,8 @@ def main():
         "front_right_leg":  0.85,
         "rear_left_leg":    0.85,
         "rear_right_leg":   0.85,
-        "front_left_foot":  -1.4,
-        "front_right_foot": -1.4,
+        "front_left_foot":  -1.6,
+        "front_right_foot": -1.6,
         "rear_left_foot":   -1.4,
         "rear_right_foot":  -1.4,
     }

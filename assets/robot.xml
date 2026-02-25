@@ -5,7 +5,7 @@
 
   <default>
     <joint damping="0.6" armature="0.01" limited="true"/>
-    <geom friction="1.0 0.005 0.0001" solref="0.02 1" solimp="0.9 0.95 0.001"/>
+    <geom density = "450" friction="1.0 0.005 0.0001" solref="0.02 1" solimp="0.9 0.95 0.001"/>
   </default>
 
   <asset>
@@ -39,7 +39,24 @@
 
     <body name="base_link" pos="0 0 0.30">
       <freejoint/>
+            <!-- ================= REAR PAYLOAD (cuboid prim) ================= -->
+      <!-- Body length ~ 0.186m (front/rear shoulder at +/-0.093). Half-length ~ 0.093m.
+           MuJoCo box "size" is HALF-EXTENTS, so x half-extent ~0.0465 gives ~0.093m total length. -->
+      <geom name="rear_payload"
+            type="box"
+            pos="-0.18 0.0 0.0"
+            size="0.093 0.030 0.025"
+            mass="0.5"
+            rgba="0.25 0.25 0.25 1"
+            contype="0" conaffinity="0"/>
 
+      <geom name="battery_and_electronics"
+            type="box"
+            pos="0.0 0.0 0.0"
+            size="0.093 0.030 0.025"
+            mass="1.0"
+            rgba="0.25 0.25 0.25 1"
+            contype="0" conaffinity="0"/>
       <!-- base_inertia visual -->
       <geom name="base_inertia_vis" type="mesh" mesh="mainbody"
             pos="0.0425 0.055 -0.02" euler="0 0 3.1416"
@@ -194,20 +211,50 @@
     </body>
   </worldbody>
 
-  <actuator>
-    <position name="p_fl_shoulder" joint="front_left_shoulder"  kp="60" ctrlrange="-0.548 0.548"/>
-    <position name="p_fr_shoulder" joint="front_right_shoulder" kp="60" ctrlrange="-0.548 0.548"/>
-    <position name="p_rl_shoulder" joint="rear_left_shoulder"   kp="60" ctrlrange="-0.548 0.548"/>
-    <position name="p_rr_shoulder" joint="rear_right_shoulder"  kp="60" ctrlrange="-0.548 0.548"/>
+    <actuator>
+    <!-- RDS3235 @ 7.4V: ~35 kg*cm ~= 3.43 N*m torque cap -->
+    <!-- kp units: N*m/rad (hinge joints in radians) -->
 
-    <position name="p_fl_hip" joint="front_left_leg"  kp="80" ctrlrange="-2.666 1.548"/>
-    <position name="p_fr_hip" joint="front_right_leg" kp="80" ctrlrange="-2.666 1.548"/>
-    <position name="p_rl_hip" joint="rear_left_leg"   kp="80" ctrlrange="-2.666 1.548"/>
-    <position name="p_rr_hip" joint="rear_right_leg"  kp="80" ctrlrange="-2.666 1.548"/>
+    <!-- SHOULDERS (ab/ad) - slightly softer -->
+    <position name="p_fl_shoulder" joint="front_left_shoulder"
+              kp="15" ctrlrange="-0.548 0.548"
+              forcelimited="true" forcerange="-3.43 3.43"/>
+    <position name="p_fr_shoulder" joint="front_right_shoulder"
+              kp="15" ctrlrange="-0.548 0.548"
+              forcelimited="true" forcerange="-3.43 3.43"/>
+    <position name="p_rl_shoulder" joint="rear_left_shoulder"
+              kp="15" ctrlrange="-0.548 0.548"
+              forcelimited="true" forcerange="-3.43 3.43"/>
+    <position name="p_rr_shoulder" joint="rear_right_shoulder"
+              kp="15" ctrlrange="-0.548 0.548"
+              forcelimited="true" forcerange="-3.43 3.43"/>
 
-    <position name="p_fl_knee" joint="front_left_foot"  kp="80" ctrlrange="-2.59 0.1"/>
-    <position name="p_fr_knee" joint="front_right_foot" kp="80" ctrlrange="-2.59 0.1"/>
-    <position name="p_rl_knee" joint="rear_left_foot"   kp="80" ctrlrange="-2.59 0.1"/>
-    <position name="p_rr_knee" joint="rear_right_foot"  kp="80" ctrlrange="-2.59 0.1"/>
+    <!-- HIPS (pitch) -->
+    <position name="p_fl_hip" joint="front_left_leg"
+              kp="20" ctrlrange="-2.666 1.548"
+              forcelimited="true" forcerange="-3.43 3.43"/>
+    <position name="p_fr_hip" joint="front_right_leg"
+              kp="20" ctrlrange="-2.666 1.548"
+              forcelimited="true" forcerange="-3.43 3.43"/>
+    <position name="p_rl_hip" joint="rear_left_leg"
+              kp="20" ctrlrange="-2.666 1.548"
+              forcelimited="true" forcerange="-3.43 3.43"/>
+    <position name="p_rr_hip" joint="rear_right_leg"
+              kp="20" ctrlrange="-2.666 1.548"
+              forcelimited="true" forcerange="-3.43 3.43"/>
+
+    <!-- KNEES -->
+    <position name="p_fl_knee" joint="front_left_foot"
+              kp="20" ctrlrange="-2.59 0.1"
+              forcelimited="true" forcerange="-3.43 3.43"/>
+    <position name="p_fr_knee" joint="front_right_foot"
+              kp="20" ctrlrange="-2.59 0.1"
+              forcelimited="true" forcerange="-3.43 3.43"/>
+    <position name="p_rl_knee" joint="rear_left_foot"
+              kp="20" ctrlrange="-2.59 0.1"
+              forcelimited="true" forcerange="-3.43 3.43"/>
+    <position name="p_rr_knee" joint="rear_right_foot"
+              kp="20" ctrlrange="-2.59 0.1"
+              forcelimited="true" forcerange="-3.43 3.43"/>
   </actuator>
 </mujoco>
