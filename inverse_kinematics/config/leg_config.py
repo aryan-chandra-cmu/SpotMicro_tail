@@ -62,8 +62,8 @@ LEFT_FRONT_LEG = {
     },
     
     "safety_limits": {
-        "knee": {"min": 110.0, "max": 240.0},       # IK joint angle limits (deg)
-        "hip": {"min": 160.0, "max": 250.0},
+        "knee": {"min": 90.0, "max": 180.0},       # IK joint angle limits (deg)
+        "hip": {"min": -60.0, "max": 60.0},
         "shoulder": {"min": 70.0, "max": 110.0},
     },
 }

@@ -206,7 +206,7 @@ def plot_leg_ik(x, y, z):
     ax.plot([p1[0], pf[0]], [p1[1], pf[1]], 'o--', linewidth=2, label='Foot line in y-z plane')
 
     # Mark points
-    ax.text(p0[0], p0[1], '  Shoulder origin')
+    ax.text(p0[0], p0[1], '  Origin')
     ax.text(p1[0], p1[1], '  Shoulder joint')
     ax.text(pf[0], pf[1], '  Foot')
 
@@ -280,6 +280,6 @@ if __name__ == "__main__":
     # Example target
     x = 0.0
     y = -40.0
-    z = 240.0
+    z = 180.0
 
     plot_leg_ik(x, y, z)

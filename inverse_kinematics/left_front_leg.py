@@ -173,7 +173,7 @@ class LeftFrontLeg(Leg):
         hip_deg = math.degrees(hip)
         shoulder_deg = math.degrees(shoulder)
 
-        return knee_deg, hip_deg, shoulder_deg
+        return hip_deg, shoulder_deg, knee_deg
 
     def joint_angles_to_motor_angles(self, theta_hip, theta_shoulder, theta_knee):
         """

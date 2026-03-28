@@ -55,7 +55,6 @@ def init_motor_drivers():
 
     return drivers
 
-
 def main():
     """
     Main control loop.
