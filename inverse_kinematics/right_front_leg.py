@@ -14,7 +14,7 @@ import math
 
 from leg import Leg
 from servo import Servo
-from config.leg_config import RIGHT_FRONT_LEG
+from spot_config import RIGHT_FRONT_LEG
 
 
 class RightFrontLeg(Leg):

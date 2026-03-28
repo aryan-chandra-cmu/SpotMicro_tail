@@ -21,22 +21,23 @@ from right_rear_leg import RightRearLeg
 # from gait_control import GaitControl
 from ik_testing import IKTesting
 from data_logger import DataLogger
-from config.leg_config import LEFT_FRONT_LEG, LEFT_REAR_LEG, RIGHT_FRONT_LEG, RIGHT_REAR_LEG
+from orientation_estimator import OrientationEstimator
+from spot_micro_tail import SpotMicroTail
+from spot_config import LEFT_FRONT_LEG, LEFT_REAR_LEG, RIGHT_FRONT_LEG, RIGHT_REAR_LEG, TAIL
 
-def init_motor_drivers():
+def init_i2c():
     """
-    Initialize I2C bus and create PCA9685 motor driver objects.
+    Initialize I2C bus, PCA9685 motor drivers, and the BNO055 IMU.
 
-    Creates one PCA9685 instance per driver board. Each board is
-    identified by its I2C address. Currently only one driver is used
-    (for the left front leg); additional drivers for other legs
-    will be added here in the future.
+    Creates one PCA9685 instance per driver board on the shared I2C
+    bus.  Also creates the OrientationEstimator (BNO055 IMU) on the
+    same bus.
 
     Returns
     -------
-    dict
-        Dictionary of PCA9685 objects keyed by a descriptive name.
-        Example: {"left_front": <PCA9685 at 0x40>}
+    tuple of (dict, OrientationEstimator)
+        (drivers, imu) — Dictionary of PCA9685 objects keyed by leg
+        name, and the IMU orientation estimator.
     """
     i2c = busio.I2C(board.SCL, board.SDA)
 
@@ -63,7 +64,10 @@ def init_motor_drivers():
         "right_rear":  pca_right_rear,
     }
 
-    return drivers
+    # Create BNO055 IMU orientation estimator
+    # imu = OrientationEstimator(i2c)
+
+    return drivers, None
 
 def main():
     """
@@ -76,9 +80,9 @@ def main():
     5. Run the control loop: query IK tester for foot targets,
        command each leg to reach its target.
     """
-    # --- Hardware initialization ---
-    print("Initializing motor drivers...")
-    drivers = init_motor_drivers()
+    # --- I2C initialization ---
+    print("Initializing I2C devices...")
+    drivers, imu = init_i2c()
 
     # --- Leg instantiation ---
     print("Initializing legs...")
@@ -94,11 +98,16 @@ def main():
         "right_rear":  right_rear,
     }
 
+    # --- Tail instantiation ---
+    print("Initializing tail...")
+    tail = SpotMicroTail(pca_left=drivers["left_rear"], pca_right=drivers["right_rear"])
+
     # --- Initialize servos to straight-leg position ---
     # WARNING: Hold the quadruped in the air before running!
-    print("Initializing servos to straight-leg configuration...")
+    print("Initializing servos to straight-leg configuration and tail to neutral...")
     for leg_name, leg in legs.items():
         leg.initialize()
+    tail.initialize()
 
     # Wait for user confirmation before proceeding
     while True:

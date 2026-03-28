@@ -11,7 +11,7 @@ for hardware validation of inverse kinematics calculations.
 
 import numpy as np
 
-from config.leg_config import LEFT_FRONT_LEG, LEFT_REAR_LEG, RIGHT_FRONT_LEG, RIGHT_REAR_LEG
+from spot_config import LEFT_FRONT_LEG, LEFT_REAR_LEG, RIGHT_FRONT_LEG, RIGHT_REAR_LEG
 
 
 class IKTesting:
@@ -119,27 +119,24 @@ class IKTesting:
 
     def generate_trajectory(self, total_time, target_positions=None):
         """
-        Generate a simple straight-line test trajectory for each leg.
+        Generate cyclical stepping test trajectories for each leg.
 
-        The trajectory moves each foot from its initial position
-        (stored in self.initial_positions to a target position over
-        the specified duration using a minimum-jerk (5th-order
-        polynomial) profile so that initial and final velocities
-        and accelerations are all zero.
-
-        Computes polynomial coefficients per axis (x, y, z) for each
-        leg via get_min_jerk_trajectory and stores them for later
-        evaluation in get_foot_position.
+        The trajectory repeatedly moves each foot from its initial position
+        to a target position (upward) and back (downward).
 
         Parameters
         ----------
         total_time : float
-            Duration of the trajectory in seconds.
+            Duration of the overall test in seconds.
         target_positions : dict, optional
             Target (x, y, z) for each leg, keyed by leg name.
             If None, defaults are used.
         """
         self.total_time = total_time
+        self.step_duration = 2.0  # seconds per full step (up and down)
+        
+        # Calculate number of steps (defined locally per request)
+        no_of_steps = int(self.total_time / self.step_duration)
 
         if target_positions is None:
             # Default target positions for testing (small motions)
@@ -150,26 +147,37 @@ class IKTesting:
                 "right_rear":  (0.0, 40.0, 180.0),
             }
 
+        half_step = self.step_duration / 2.0
+
         for leg_name, target in target_positions.items():
             start = self.initial_positions[leg_name]
 
-            # Compute minimum-jerk coefficients for each axis (zero vel/acc at both ends)
-            coeffs_x = self.get_min_jerk_trajectory(start[0], 0.0, 0.0, target[0], 0.0, 0.0, total_time)
-            coeffs_y = self.get_min_jerk_trajectory(start[1], 0.0, 0.0, target[1], 0.0, 0.0, total_time)
-            coeffs_z = self.get_min_jerk_trajectory(start[2], 0.0, 0.0, target[2], 0.0, 0.0, total_time)
+            # Upward trajectory (start -> target) over step_duration/2
+            up_x = self.get_min_jerk_trajectory(start[0], 0.0, 0.0, target[0], 0.0, 0.0, half_step)
+            up_y = self.get_min_jerk_trajectory(start[1], 0.0, 0.0, target[1], 0.0, 0.0, half_step)
+            up_z = self.get_min_jerk_trajectory(start[2], 0.0, 0.0, target[2], 0.0, 0.0, half_step)
+
+            # Downward trajectory (target -> start) over step_duration/2
+            down_x = self.get_min_jerk_trajectory(target[0], 0.0, 0.0, start[0], 0.0, 0.0, half_step)
+            down_y = self.get_min_jerk_trajectory(target[1], 0.0, 0.0, start[1], 0.0, 0.0, half_step)
+            down_z = self.get_min_jerk_trajectory(target[2], 0.0, 0.0, start[2], 0.0, 0.0, half_step)
 
             self.trajectories[leg_name] = {
-                "coeffs_x": coeffs_x,
-                "coeffs_y": coeffs_y,
-                "coeffs_z": coeffs_z,
+                "up_x": up_x,
+                "up_y": up_y,
+                "up_z": up_z,
+                "down_x": down_x,
+                "down_y": down_y,
+                "down_z": down_z,
             }
 
     def get_foot_position(self, leg_name, t):
         """
         Return the target foot position for a given leg at time t.
 
-        Evaluates the 5th-order polynomial from stored coefficients
-        for each axis.
+        Determines the current step phase (upward or downward), resets
+        local time within the half-step, and evaluates the corresponding
+        5th-order polynomial.
 
         Parameters
         ----------
@@ -185,12 +193,27 @@ class IKTesting:
         """
         traj = self.trajectories[leg_name]
 
-        # Clamp t to [0, total_time]
-        t = max(0.0, min(t, self.total_time))
+        # Clamp t to [0, total_time-epsilon] to handle edge cases
+        t = max(0.0, min(t, self.total_time - 1e-6))
 
-        # Evaluate polynomial: p(t) = a0 + a1*t + a2*t^2 + a3*t^3 + a4*t^4 + a5*t^5
-        x = sum(a * t**i for i, a in enumerate(traj["coeffs_x"]))
-        y = sum(a * t**i for i, a in enumerate(traj["coeffs_y"]))
-        z = sum(a * t**i for i, a in enumerate(traj["coeffs_z"]))
+        # Determine step logic
+        step_number = int(t / self.step_duration)
+        local_t = t % self.step_duration    # returns floats too
+        
+        half_step = self.step_duration / 2.0
+
+        if local_t < half_step:
+            # Upward trajectory (first half of the step)
+            coeffs_x, coeffs_y, coeffs_z = traj["up_x"], traj["up_y"], traj["up_z"]
+            eval_t = local_t
+        else:
+            # Downward trajectory (second half of the step)
+            coeffs_x, coeffs_y, coeffs_z = traj["down_x"], traj["down_y"], traj["down_z"]
+            eval_t = local_t - half_step
+
+        # Evaluate polynomial: p(eval_t) = a0 + a1*t + a2*t^2 + a3*t^3 + a4*t^4 + a5*t^5
+        x = sum(a * eval_t**i for i, a in enumerate(coeffs_x))
+        y = sum(a * eval_t**i for i, a in enumerate(coeffs_y))
+        z = sum(a * eval_t**i for i, a in enumerate(coeffs_z))
 
         return (float(x), float(y), float(z))

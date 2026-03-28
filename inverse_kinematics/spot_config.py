@@ -1,11 +1,15 @@
 # Written by team Tailenders (Atharva Sunder, Kausik Kolluri, Jash Lapsiwala, Aryan Chandra, Raymond Cao)
 # with assistance from Claude Opus 4.6
-# Date: 19th March 2026
+# Date: 28th March 2026
 
 """
-Leg configuration for the Spot Micro quadruped.
+Configuration for the Spot Micro quadruped.
 
-Each leg config is a dictionary containing:
+Contains dictionaries for:
+  - Leg configs (LEFT_FRONT_LEG, LEFT_REAR_LEG, RIGHT_FRONT_LEG, RIGHT_REAR_LEG)
+  - Tail config (TAIL)
+
+Each leg config dictionary contains:
   - link_lengths: dict with l1 (hip offset), l2 (upper leg), l3 (lower leg) in mm
   - servos: dict keyed by joint name (hip, shoulder, knee), each containing:
       - channel:    PCA9685 channel number
@@ -14,7 +18,17 @@ Each leg config is a dictionary containing:
       - min_angle:  angle (deg) corresponding to min_pulse
       - max_angle:  angle (deg) corresponding to max_pulse
   - driver_address: I2C address of the PCA9685 board for this leg (hex int)
+
+The tail config dictionary contains:
+  - servos: dict keyed by side (left, right), each containing servo params
+  - pid_gains: dict with proportional, integral, derivative gains
+  - safety_limits: servo angle limits for each side
+  - driver_addresses: I2C addresses for left and right PCA9685 boards
 """
+
+# ============================================================================
+# LEG CONFIGURATIONS
+# ============================================================================
 
 # Left front leg link lengths (mm)
 LFL_L1 = 40.0    # hip offset — lateral distance from hip pivot to shoulder pivot
@@ -61,7 +75,7 @@ LEFT_FRONT_LEG = {
         "servo_offset_knee": 0.0,        # offset to correct servo zeroing (deg)
         "x": 0.0,
         "y": -LFL_L1,
-        "z": LFL_L2 + LFL_L3,
+        "z": LFL_L2 + LFL_L3 - 10,
     },
     
     "safety_limits": {
@@ -116,7 +130,7 @@ LEFT_REAR_LEG = {
         "servo_offset_knee": 0.0,        # offset to correct servo zeroing (deg)
         "x": 0.0,
         "y": -LRL_L1,
-        "z": LRL_L2 + LRL_L3,
+        "z": LRL_L2 + LRL_L3 - 10,
     },
     
     "safety_limits": {
@@ -171,7 +185,7 @@ RIGHT_FRONT_LEG = {
         "servo_offset_knee": 0.0,        # offset to correct servo zeroing (deg)
         "x": 0.0,
         "y": RFL_L1,
-        "z": RFL_L2 + RFL_L3,
+        "z": RFL_L2 + RFL_L3 - 10,
     },
     
     "safety_limits": {
@@ -226,12 +240,56 @@ RIGHT_REAR_LEG = {
         "servo_offset_knee": 0.0,        # offset to correct servo zeroing (deg)
         "x": 0.0,
         "y": RRL_L1,
-        "z": RRL_L2 + RRL_L3,
+        "z": RRL_L2 + RRL_L3 - 10,
     },
     
     "safety_limits": {
         "knee": {"min": 90.0, "max": 180.0},       # IK joint angle limits (deg)
         "hip": {"min": -60.0, "max": 60.0},
         "shoulder": {"min": 70.0, "max": 110.0},
+    },
+}
+
+# ============================================================================
+# TAIL CONFIGURATION
+# ============================================================================
+
+TAIL = {
+    "servos": {
+        "left": {
+            "channel": 3,
+            "min_pulse": 500,
+            "max_pulse": 2500,
+            "min_angle": 0.0,
+            "max_angle": 270.0,
+        },
+        "right": {
+            "channel": 3,
+            "min_pulse": 500,
+            "max_pulse": 2500,
+            "min_angle": 0.0,
+            "max_angle": 270.0,
+        },
+    },
+
+    "driver_addresses": {
+        "left":  0x41,
+        "right": 0x43,
+    },
+
+    "pid_gains": {
+        "kp": 0.0,
+        "ki": 0.0,
+        "kd": 0.0,
+    },
+
+    "initialization": {
+        "servo_left_angle": 135.0,      # neutral position (deg)
+        "servo_right_angle": 135.0,     # neutral position (deg)
+    },
+
+    "safety_limits": {
+        "left":  {"min": 45.0, "max": 225.0},   # servo angle limits (deg)
+        "right": {"min": 45.0, "max": 225.0},
     },
 }
