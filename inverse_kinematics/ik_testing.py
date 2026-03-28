@@ -11,7 +11,7 @@ for hardware validation of inverse kinematics calculations.
 
 import numpy as np
 
-from config.leg_config import LEFT_FRONT_LEG
+from config.leg_config import LEFT_FRONT_LEG, LEFT_REAR_LEG, RIGHT_FRONT_LEG, RIGHT_REAR_LEG
 
 
 class IKTesting:
@@ -33,10 +33,10 @@ class IKTesting:
         """
         # Initial foot positions keyed by leg name (populated by get_initial_positions)
         self.initial_positions = {
-            "left_front": (0.0, 0.0, 0.0),
-            # "right_front": (0.0, 0.0, 0.0),
-            # "right_back": (0.0, 0.0, 0.0),
-            # "left_back": (0.0, 0.0, 0.0),
+            "left_front":  (0.0, 0.0, 0.0),
+            "left_rear":   (0.0, 0.0, 0.0),
+            "right_front": (0.0, 0.0, 0.0),
+            "right_rear":  (0.0, 0.0, 0.0),
         }
 
         # Trajectory data keyed by leg name — each entry will hold
@@ -54,8 +54,17 @@ class IKTesting:
         self.initial_positions.
         """
         # TODO: Implement forward kinematics to obtain initial foot positions
-        init = LEFT_FRONT_LEG["initialization"]
-        self.initial_positions["left_front"] = (init["x"], init["y"], init["z"])
+        init_lf = LEFT_FRONT_LEG["initialization"]
+        self.initial_positions["left_front"] = (init_lf["x"], init_lf["y"], init_lf["z"])
+
+        init_lr = LEFT_REAR_LEG["initialization"]
+        self.initial_positions["left_rear"] = (init_lr["x"], init_lr["y"], init_lr["z"])
+
+        init_rf = RIGHT_FRONT_LEG["initialization"]
+        self.initial_positions["right_front"] = (init_rf["x"], init_rf["y"], init_rf["z"])
+
+        init_rr = RIGHT_REAR_LEG["initialization"]
+        self.initial_positions["right_rear"] = (init_rr["x"], init_rr["y"], init_rr["z"])
 
     def get_min_jerk_trajectory(self, initial_pos, initial_vel, initial_acc, final_pos, final_vel, final_acc, duration):
         """5th order polynomial function, generated using t = 0 as initial time, as it makes calculations easier.
@@ -135,10 +144,10 @@ class IKTesting:
         if target_positions is None:
             # Default target positions for testing (small motions)
             target_positions = {
-                "left_front": (0.0, -40.0, 180.0),
-                # "right_front": (30.0, -60.0, 200.0),
-                # "right_back": (30.0, -60.0, 200.0),
-                # "left_back": (30.0, -60.0, 200.0),
+                "left_front":  (0.0, -40.0, 180.0),
+                "left_rear":   (0.0, -40.0, 180.0),
+                "right_front": (0.0, 40.0, 180.0),
+                "right_rear":  (0.0, 40.0, 180.0),
             }
 
         for leg_name, target in target_positions.items():

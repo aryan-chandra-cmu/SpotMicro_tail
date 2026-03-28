@@ -5,38 +5,46 @@
 """
 Offline IK trajectory test and visualization.
 
-Instantiates the LeftFrontLeg (without hardware) and IKTesting objects,
-generates a test trajectory, and plots:
-  Figure 1: Foot position trajectory (x, y, z)
-  Figure 2: Joint angle trajectory (knee, hip, shoulder)
-  Figure 3: Joint velocity trajectory (numerical differentiation)
-  Figure 4: Servo command trajectory (motor angles)
+Instantiates all four leg objects (without hardware) and IKTesting,
+generates a test trajectory, and plots per leg:
+  Figure: 4 subplots — foot position (x, y, z), joint angles,
+          joint velocities, and servo commands.
 """
 
 import numpy as np
 import matplotlib.pyplot as plt
 
 from left_front_leg import LeftFrontLeg
+from left_rear_leg import LeftRearLeg
+from right_front_leg import RightFrontLeg
+from right_rear_leg import RightRearLeg
 from ik_testing import IKTesting
 
 
-def main():
-    # --- Instantiate leg (pca=None for offline IK computation) ---
-    leg = LeftFrontLeg(pca=None)
+def simulate_leg(leg, ik_test, leg_name, total_time, dt, num_steps):
+    """
+    Run the offline IK simulation for a single leg.
 
-    # --- Instantiate IK testing controller ---
-    ik_test = IKTesting()
-    ik_test.get_initial_positions()
+    Parameters
+    ----------
+    leg : Leg
+        The leg object (with pca=None for offline use).
+    ik_test : IKTesting
+        The IK testing controller with generated trajectories.
+    leg_name : str
+        Key used to look up trajectory, e.g. 'left_front'.
+    total_time : float
+        Total trajectory duration in seconds.
+    dt : float
+        Time step in seconds.
+    num_steps : int
+        Number of simulation steps.
 
-    # --- Generate trajectory ---
-    total_time = 10.0   # seconds
-    ik_test.generate_trajectory(total_time)
-
-    # --- Simulate the control loop and collect data ---
-    loop_rate = 50      # Hz
-    dt = 1.0 / loop_rate
-    num_steps = int(total_time / dt)
-
+    Returns
+    -------
+    dict
+        Dictionary containing all time-series arrays for plotting.
+    """
     time_arr = np.zeros(num_steps)
     pos_x = np.zeros(num_steps)
     pos_y = np.zeros(num_steps)
@@ -53,13 +61,13 @@ def main():
         time_arr[step] = t
 
         # Get foot position from trajectory
-        x, y, z = ik_test.get_foot_position("left_front", t)
+        x, y, z = ik_test.get_foot_position(leg_name, t)
         pos_x[step] = x
         pos_y[step] = y
         pos_z[step] = z
 
-        # Compute IK joint angles (returns knee, hip, shoulder)
-        knee_deg, hip_deg, shoulder_deg = leg.compute_ik(x, y, z)
+        # Compute IK joint angles (returns hip, shoulder, knee)
+        hip_deg, shoulder_deg, knee_deg = leg.compute_ik(x, y, z)
         knee_angles[step] = knee_deg
         hip_angles[step] = hip_deg
         shoulder_angles[step] = shoulder_deg
@@ -74,97 +82,133 @@ def main():
 
         t += dt
 
-    # --- Compute joint velocities via numerical differentiation ---
+    # Compute joint velocities via numerical differentiation
     knee_vel = np.gradient(knee_angles, dt)
     hip_vel = np.gradient(hip_angles, dt)
     shoulder_vel = np.gradient(shoulder_angles, dt)
 
-    # ================================================================
-    # Figure 1: Foot position trajectory
-    # ================================================================
-    fig1, axes1 = plt.subplots(3, 1, figsize=(10, 8), sharex=True)
-    fig1.suptitle("Foot Position Trajectory", fontsize=14)
+    return {
+        "time": time_arr,
+        "pos_x": pos_x, "pos_y": pos_y, "pos_z": pos_z,
+        "knee_angles": knee_angles, "hip_angles": hip_angles, "shoulder_angles": shoulder_angles,
+        "knee_vel": knee_vel, "hip_vel": hip_vel, "shoulder_vel": shoulder_vel,
+        "servo_knee": servo_knee, "servo_hip": servo_hip, "servo_shoulder": servo_shoulder,
+    }
 
-    axes1[0].plot(time_arr, pos_x, 'b-', linewidth=2)
-    axes1[0].set_ylabel("x (mm)")
-    axes1[0].set_title("Forward")
-    axes1[0].grid(True)
 
-    axes1[1].plot(time_arr, pos_y, 'g-', linewidth=2)
-    axes1[1].set_ylabel("y (mm)")
-    axes1[1].set_title("Lateral (inward +)")
-    axes1[1].grid(True)
+def plot_leg(data, leg_title):
+    """
+    Create a figure window with 4 subplot groups for a single leg.
 
-    axes1[2].plot(time_arr, pos_z, 'r-', linewidth=2)
-    axes1[2].set_ylabel("z (mm)")
-    axes1[2].set_title("Downward")
-    axes1[2].set_xlabel("Time (s)")
-    axes1[2].grid(True)
+    Parameters
+    ----------
+    data : dict
+        Output from simulate_leg().
+    leg_title : str
+        Human-readable leg name for the window title.
+    """
+    time_arr = data["time"]
 
-    fig1.tight_layout()
+    fig, axes = plt.subplots(4, 3, figsize=(14, 12), sharex=True)
+    fig.suptitle(leg_title, fontsize=16, fontweight="bold")
 
-    # ================================================================
-    # Figure 2: Joint angle trajectory
-    # ================================================================
-    fig2, axes2 = plt.subplots(3, 1, figsize=(10, 8), sharex=True)
-    fig2.suptitle("Joint Angle Trajectory", fontsize=14)
+    # --- Row 0: Foot position ---
+    axes[0, 0].plot(time_arr, data["pos_x"], 'b-', linewidth=2)
+    axes[0, 0].set_ylabel("x (mm)")
+    axes[0, 0].set_title("Forward")
+    axes[0, 0].grid(True)
 
-    axes2[0].plot(time_arr, knee_angles, 'b-', linewidth=2)
-    axes2[0].set_ylabel("Knee (deg)")
-    axes2[0].grid(True)
+    axes[0, 1].plot(time_arr, data["pos_y"], 'g-', linewidth=2)
+    axes[0, 1].set_ylabel("y (mm)")
+    axes[0, 1].set_title("Lateral")
+    axes[0, 1].grid(True)
 
-    axes2[1].plot(time_arr, hip_angles, 'g-', linewidth=2)
-    axes2[1].set_ylabel("Hip (deg)")
-    axes2[1].grid(True)
+    axes[0, 2].plot(time_arr, data["pos_z"], 'r-', linewidth=2)
+    axes[0, 2].set_ylabel("z (mm)")
+    axes[0, 2].set_title("Downward")
+    axes[0, 2].grid(True)
 
-    axes2[2].plot(time_arr, shoulder_angles, 'r-', linewidth=2)
-    axes2[2].set_ylabel("Shoulder (deg)")
-    axes2[2].set_xlabel("Time (s)")
-    axes2[2].grid(True)
+    # --- Row 1: Joint angles ---
+    axes[1, 0].plot(time_arr, data["knee_angles"], 'b-', linewidth=2)
+    axes[1, 0].set_ylabel("Knee (deg)")
+    axes[1, 0].set_title("Joint Angles")
+    axes[1, 0].grid(True)
 
-    fig2.tight_layout()
+    axes[1, 1].plot(time_arr, data["hip_angles"], 'g-', linewidth=2)
+    axes[1, 1].set_ylabel("Hip (deg)")
+    axes[1, 1].grid(True)
 
-    # ================================================================
-    # Figure 3: Joint velocity trajectory
-    # ================================================================
-    fig3, axes3 = plt.subplots(3, 1, figsize=(10, 8), sharex=True)
-    fig3.suptitle("Joint Velocity Trajectory", fontsize=14)
+    axes[1, 2].plot(time_arr, data["shoulder_angles"], 'r-', linewidth=2)
+    axes[1, 2].set_ylabel("Shoulder (deg)")
+    axes[1, 2].grid(True)
 
-    axes3[0].plot(time_arr, knee_vel, 'b-', linewidth=2)
-    axes3[0].set_ylabel("Knee vel (deg/s)")
-    axes3[0].grid(True)
+    # --- Row 2: Joint velocities ---
+    axes[2, 0].plot(time_arr, data["knee_vel"], 'b-', linewidth=2)
+    axes[2, 0].set_ylabel("Knee vel (deg/s)")
+    axes[2, 0].set_title("Joint Velocities")
+    axes[2, 0].grid(True)
 
-    axes3[1].plot(time_arr, hip_vel, 'g-', linewidth=2)
-    axes3[1].set_ylabel("Hip vel (deg/s)")
-    axes3[1].grid(True)
+    axes[2, 1].plot(time_arr, data["hip_vel"], 'g-', linewidth=2)
+    axes[2, 1].set_ylabel("Hip vel (deg/s)")
+    axes[2, 1].grid(True)
 
-    axes3[2].plot(time_arr, shoulder_vel, 'r-', linewidth=2)
-    axes3[2].set_ylabel("Shoulder vel (deg/s)")
-    axes3[2].set_xlabel("Time (s)")
-    axes3[2].grid(True)
+    axes[2, 2].plot(time_arr, data["shoulder_vel"], 'r-', linewidth=2)
+    axes[2, 2].set_ylabel("Shoulder vel (deg/s)")
+    axes[2, 2].grid(True)
 
-    fig3.tight_layout()
+    # --- Row 3: Servo commands ---
+    axes[3, 0].plot(time_arr, data["servo_knee"], 'b-', linewidth=2)
+    axes[3, 0].set_ylabel("Servo Knee (deg)")
+    axes[3, 0].set_title("Servo Commands")
+    axes[3, 0].set_xlabel("Time (s)")
+    axes[3, 0].grid(True)
 
-    # ================================================================
-    # Figure 4: Servo command trajectory
-    # ================================================================
-    fig4, axes4 = plt.subplots(3, 1, figsize=(10, 8), sharex=True)
-    fig4.suptitle("Servo Command Trajectory", fontsize=14)
+    axes[3, 1].plot(time_arr, data["servo_hip"], 'g-', linewidth=2)
+    axes[3, 1].set_ylabel("Servo Hip (deg)")
+    axes[3, 1].set_xlabel("Time (s)")
+    axes[3, 1].grid(True)
 
-    axes4[0].plot(time_arr, servo_knee, 'b-', linewidth=2)
-    axes4[0].set_ylabel("Servo Knee (deg)")
-    axes4[0].grid(True)
+    axes[3, 2].plot(time_arr, data["servo_shoulder"], 'r-', linewidth=2)
+    axes[3, 2].set_ylabel("Servo Shoulder (deg)")
+    axes[3, 2].set_xlabel("Time (s)")
+    axes[3, 2].grid(True)
 
-    axes4[1].plot(time_arr, servo_hip, 'g-', linewidth=2)
-    axes4[1].set_ylabel("Servo Hip (deg)")
-    axes4[1].grid(True)
+    fig.tight_layout()
 
-    axes4[2].plot(time_arr, servo_shoulder, 'r-', linewidth=2)
-    axes4[2].set_ylabel("Servo Shoulder (deg)")
-    axes4[2].set_xlabel("Time (s)")
-    axes4[2].grid(True)
 
-    fig4.tight_layout()
+def main():
+    # --- Instantiate all four legs (pca=None for offline IK computation) ---
+    legs = {
+        "left_front":  LeftFrontLeg(pca=None),
+        "left_rear":   LeftRearLeg(pca=None),
+        "right_front": RightFrontLeg(pca=None),
+        "right_rear":  RightRearLeg(pca=None),
+    }
+
+    leg_titles = {
+        "left_front":  "Left Front Leg",
+        "left_rear":   "Left Rear Leg",
+        "right_front": "Right Front Leg",
+        "right_rear":  "Right Rear Leg",
+    }
+
+    # --- Instantiate IK testing controller ---
+    ik_test = IKTesting()
+    ik_test.get_initial_positions()
+
+    # --- Generate trajectory ---
+    total_time = 10.0   # seconds
+    ik_test.generate_trajectory(total_time)
+
+    # --- Simulation parameters ---
+    loop_rate = 50      # Hz
+    dt = 1.0 / loop_rate
+    num_steps = int(total_time / dt)
+
+    # --- Simulate and plot each leg ---
+    for leg_name, leg in legs.items():
+        data = simulate_leg(leg, ik_test, leg_name, total_time, dt, num_steps)
+        plot_leg(data, leg_titles[leg_name])
 
     plt.show()
 

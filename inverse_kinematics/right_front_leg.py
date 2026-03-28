@@ -1,27 +1,27 @@
 # Written by team Tailenders (Atharva Sunder, Kausik Kolluri, Jash Lapsiwala, Aryan Chandra, Raymond Cao)
 # with assistance from Claude Opus 4.6
-# Date: 19th March 2026
+# Date: 28th March 2026
 
 """
-Left front leg for the Spot Micro quadruped.
+Right front leg for the Spot Micro quadruped.
 
 Inherits from the abstract Leg base class and implements the
 inverse kinematics and joint-to-motor angle conversion specific
-to the left front leg's geometry and servo orientation.
+to the right front leg's geometry and servo orientation.
 """
 
 import math
 
 from leg import Leg
 from servo import Servo
-from config.leg_config import LEFT_FRONT_LEG
+from config.leg_config import RIGHT_FRONT_LEG
 
 
-class LeftFrontLeg(Leg):
+class RightFrontLeg(Leg):
 
     def __init__(self, pca):
         """
-        Initialize the LeftFrontLeg.
+        Initialize the RightFrontLeg.
 
         Loads configuration from config/leg_config.py and passes it,
         along with the PCA9685 driver, to the parent Leg class.
@@ -32,7 +32,7 @@ class LeftFrontLeg(Leg):
         pca : adafruit_pca9685.PCA9685
             The PCA9685 driver object controlling this leg's servos.
         """
-        super().__init__(pca, LEFT_FRONT_LEG)
+        super().__init__(pca, RIGHT_FRONT_LEG)
 
         servo_cfg = self.config["servos"]
         init_cfg = self.config["initialization"]
@@ -68,7 +68,6 @@ class LeftFrontLeg(Leg):
         )
 
         # --- Safety limits ---
-        # Load joint angle limits from config and convert to servo angle limits
         limits = self.config["safety_limits"]
 
         self.joint_limits = {
@@ -77,9 +76,6 @@ class LeftFrontLeg(Leg):
             "shoulder": (limits["shoulder"]["min"], limits["shoulder"]["max"]),
         }
 
-        # Convert joint angle extremes to servo angle extremes
-        # For each joint, map both min and max through joint_angles_to_motor_angles
-        # and take the resulting min/max (order may flip due to sign conventions)
         motor_hip_a, motor_shoulder_a, motor_knee_a = self.joint_angles_to_motor_angles(
             limits["hip"]["min"], limits["shoulder"]["min"], limits["knee"]["min"]
         )
@@ -97,11 +93,6 @@ class LeftFrontLeg(Leg):
         """
         Command servos to their initial angles from config.
 
-        Moves all three servos to the initialization angles defined
-        in config/leg_config.py, corresponding to a straight leg
-        configuration.  The servos jump to these positions at maximum
-        speed because the starting position is unknown.
-
         WARNING: Hold the quadruped in the air before calling this
         method to prevent damage or unexpected motion.
         """
@@ -113,22 +104,12 @@ class LeftFrontLeg(Leg):
 
     def compute_ik(self, x, y, z):
         """
-        Compute inverse kinematics for the left front leg.
+        Compute inverse kinematics for the right front leg.
 
-        Given a target foot position in the left front leg's local
+        Given a target foot position in the right front leg's local
         coordinate frame, compute the required joint angles using
         3-DOF geometric IK (hip abduction + shoulder/knee in the
         sagittal plane).
-
-        Coordinate frame convention:
-          - x: forward (positive = forward)
-          - y: lateral (positive = inward to body)
-          - z: downward (positive = downward)
-
-        Uses link lengths from config:
-          - l1: hip offset (lateral shoulder-to-hip distance)
-          - l2: upper leg length
-          - l3: lower leg length
 
         Parameters
         ----------
@@ -144,37 +125,25 @@ class LeftFrontLeg(Leg):
         tuple of (float, float, float)
             (theta_hip, theta_shoulder, theta_knee) in degrees.
         """
-        
-        # Link lengths from config
         upper_leg = self.config["link_lengths"]["l2"]
         lower_leg = self.config["link_lengths"]["l3"]
         shoulder_offset = self.config["link_lengths"]["l1"]
 
-        # Quantity used to reduce 3D geometry to the hip-knee plane
         inside = y**2 + z**2 - shoulder_offset**2
-
         y1 = math.sqrt(inside)
 
-        # Distance from hip joint to foot in the hip-knee plane
         distance = math.sqrt(x**2 + y1**2)
 
-        # Reachability check
         if distance > upper_leg + lower_leg or distance < abs(upper_leg - lower_leg):
             raise ValueError("Target is outside the reachable workspace of the hip-knee chain.")
 
-        # Clamp acos argument for numerical safety
         cos_knee = (distance**2 - upper_leg**2 - lower_leg**2) / (-2.0 * upper_leg * lower_leg)
         cos_knee = max(-1.0, min(1.0, cos_knee))
 
         knee = math.acos(cos_knee)
-
-        # Obtain hip angle
         hip = math.asin((lower_leg * math.sin(knee)) / distance) + math.atan(-x / y1)
+        shoulder = math.atan2(y1, shoulder_offset) + math.atan2(y, z)
 
-        # Obtain shoulder angle
-        shoulder = math.atan2(y1, shoulder_offset) + math.atan2(-y, z)
-
-        # Convert to degrees
         knee_deg = math.degrees(knee)
         hip_deg = math.degrees(hip)
         shoulder_deg = math.degrees(shoulder)
@@ -183,11 +152,7 @@ class LeftFrontLeg(Leg):
 
     def joint_angles_to_motor_angles(self, theta_hip, theta_shoulder, theta_knee):
         """
-        Convert IK joint angles to servo motor angles for the left front leg.
-
-        Applies left-front-specific offsets, sign flips, and mechanical
-        zero adjustments so that the computed IK angles map correctly
-        to the physical servo positions.
+        Convert IK joint angles to servo motor angles for the right front leg.
 
         Parameters
         ----------
@@ -201,20 +166,17 @@ class LeftFrontLeg(Leg):
         Returns
         -------
         tuple of (float, float, float)
-            (motor_hip, motor_shoulder, motor_knee) in degrees,
-            ready to be sent to the servos.
+            (motor_hip, motor_shoulder, motor_knee) in degrees.
         """
-        motor_knee = theta_knee + self.offset_knee
-        motor_hip = theta_hip + 90.0 + self.offset_hip
-        motor_shoulder = 180.0 - theta_shoulder + self.offset_shoulder
+        motor_knee = 360.0 - theta_knee + self.offset_knee
+        motor_hip = 90.0 - theta_hip + self.offset_hip
+        motor_shoulder = theta_shoulder + self.offset_shoulder
 
         return motor_hip, motor_shoulder, motor_knee
 
     def motor_angles_to_joint_angles(self, motor_hip, motor_shoulder, motor_knee):
         """
-        Convert servo motor angles back to IK joint angles for the left front leg.
-
-        This is the inverse of joint_angles_to_motor_angles.
+        Convert servo motor angles back to IK joint angles for the right front leg.
 
         Parameters
         ----------
@@ -230,19 +192,15 @@ class LeftFrontLeg(Leg):
         tuple of (float, float, float)
             (theta_hip, theta_shoulder, theta_knee) in degrees.
         """
-        theta_knee = motor_knee - self.offset_knee
-        theta_hip = motor_hip - 90.0 - self.offset_hip
-        theta_shoulder = 180.0 - motor_shoulder + self.offset_shoulder
+        theta_knee = 360.0 - motor_knee + self.offset_knee
+        theta_hip = 90.0 - motor_hip + self.offset_hip
+        theta_shoulder = motor_shoulder - self.offset_shoulder
 
         return theta_hip, theta_shoulder, theta_knee
 
     def assert_safety_limits(self, motor_hip, motor_shoulder, motor_knee):
         """
         Check that servo commands are within safety thresholds.
-
-        Raises a RuntimeError if any servo command falls outside
-        the allowable range derived from the joint angle limits
-        in config.
 
         Parameters
         ----------
@@ -293,7 +251,6 @@ class LeftFrontLeg(Leg):
         tuple of (tuple, tuple)
             ((theta_hip, theta_shoulder, theta_knee),
              (motor_hip, motor_shoulder, motor_knee))
-            Joint angles and servo motor angles in degrees.
         """
         theta_hip, theta_shoulder, theta_knee = self.compute_ik(x, y, z)
         motor_hip, motor_shoulder, motor_knee = self.joint_angles_to_motor_angles(theta_hip, theta_shoulder, theta_knee)

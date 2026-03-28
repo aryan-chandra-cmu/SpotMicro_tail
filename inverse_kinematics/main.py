@@ -15,10 +15,13 @@ import busio
 from adafruit_pca9685 import PCA9685
 
 from left_front_leg import LeftFrontLeg
+from left_rear_leg import LeftRearLeg
+from right_front_leg import RightFrontLeg
+from right_rear_leg import RightRearLeg
 # from gait_control import GaitControl
 from ik_testing import IKTesting
 from data_logger import DataLogger
-from config.leg_config import LEFT_FRONT_LEG
+from config.leg_config import LEFT_FRONT_LEG, LEFT_REAR_LEG, RIGHT_FRONT_LEG, RIGHT_REAR_LEG
 
 def init_motor_drivers():
     """
@@ -41,16 +44,23 @@ def init_motor_drivers():
     pca_left_front = PCA9685(i2c, address=LEFT_FRONT_LEG["driver_address"])
     pca_left_front.frequency = 50  # 50 Hz for standard servos
 
-    # Future drivers:
-    # pca_right_front = PCA9685(i2c, address=RIGHT_FRONT_LEG["driver_address"])
-    # pca_right_back  = PCA9685(i2c, address=RIGHT_BACK_LEG["driver_address"])
-    # pca_left_back   = PCA9685(i2c, address=LEFT_BACK_LEG["driver_address"])
+    # Create PCA9685 driver for the left rear leg
+    pca_left_rear = PCA9685(i2c, address=LEFT_REAR_LEG["driver_address"])
+    pca_left_rear.frequency = 50  # 50 Hz for standard servos
+
+    # Create PCA9685 driver for the right front leg
+    pca_right_front = PCA9685(i2c, address=RIGHT_FRONT_LEG["driver_address"])
+    pca_right_front.frequency = 50  # 50 Hz for standard servos
+
+    # Create PCA9685 driver for the right rear leg
+    pca_right_rear = PCA9685(i2c, address=RIGHT_REAR_LEG["driver_address"])
+    pca_right_rear.frequency = 50  # 50 Hz for standard servos
 
     drivers = {
-        "left_front": pca_left_front,
-        # "right_front": pca_right_front,
-        # "right_back":  pca_right_back,
-        # "left_back":   pca_left_back,
+        "left_front":  pca_left_front,
+        "left_rear":   pca_left_rear,
+        "right_front": pca_right_front,
+        "right_rear":  pca_right_rear,
     }
 
     return drivers
@@ -72,17 +82,16 @@ def main():
 
     # --- Leg instantiation ---
     print("Initializing legs...")
-    left_front = LeftFrontLeg(pca=drivers["left_front"])
-    # Future legs:
-    # right_front = RightFrontLeg(pca=drivers["right_front"])
-    # right_back  = RightBackLeg(pca=drivers["right_back"])
-    # left_back   = LeftBackLeg(pca=drivers["left_back"])
+    left_front  = LeftFrontLeg(pca=drivers["left_front"])
+    left_rear   = LeftRearLeg(pca=drivers["left_rear"])
+    right_front = RightFrontLeg(pca=drivers["right_front"])
+    right_rear  = RightRearLeg(pca=drivers["right_rear"])
 
     legs = {
-        "left_front": left_front,
-        # "right_front": right_front,
-        # "right_back":  right_back,
-        # "left_back":   left_back,
+        "left_front":  left_front,
+        "left_rear":   left_rear,
+        "right_front": right_front,
+        "right_rear":  right_rear,
     }
 
     # --- Initialize servos to straight-leg position ---

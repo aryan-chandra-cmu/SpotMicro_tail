@@ -53,9 +53,12 @@ LEFT_FRONT_LEG = {
     "driver_address": 0x40,
 
     "initialization": {
-        "servo_knee_angle": 180,
+        "servo_knee_angle": 180,    # modify to ensure leg is straight
         "servo_hip_angle": 90,
         "servo_shoulder_angle": 90,
+        "servo_offset_hip": 0.0,        # offset to correct servo zeroing (deg)
+        "servo_offset_shoulder": 0.0,  # offset to correct servo zeroing (deg)
+        "servo_offset_knee": 0.0,        # offset to correct servo zeroing (deg)
         "x": 0.0,
         "y": -LFL_L1,
         "z": LFL_L2 + LFL_L3,
@@ -68,7 +71,167 @@ LEFT_FRONT_LEG = {
     },
 }
 
-# Future legs can be added here following the same structure:
-# RIGHT_FRONT_LEG = { ... }
-# RIGHT_BACK_LEG  = { ... }
-# LEFT_BACK_LEG   = { ... }
+# Left rear leg link lengths (mm)
+LRL_L1 = 40.0    # hip offset — lateral distance from hip pivot to shoulder pivot
+LRL_L2 = 120.0   # upper leg length
+LRL_L3 = 120.0   # lower leg length
+
+LEFT_REAR_LEG = {
+    "link_lengths": {
+        "l1": LRL_L1,
+        "l2": LRL_L2,
+        "l3": LRL_L3,
+    },
+    "servos": {
+        "hip": {
+            "channel": 1,
+            "min_pulse": 500,
+            "max_pulse": 2500,
+            "min_angle": 0.0,
+            "max_angle": 270.0,
+        },
+        "shoulder": {
+            "channel": 2,
+            "min_pulse": 500,
+            "max_pulse": 2500,
+            "min_angle": 0.0,
+            "max_angle": 270.0,
+        },
+        "knee": {
+            "channel": 0,
+            "min_pulse": 500,
+            "max_pulse": 2500,
+            "min_angle": 0.0,
+            "max_angle": 270.0,
+        },
+    },
+    "driver_address": 0x41,
+
+    "initialization": {
+        "servo_knee_angle": 180,
+        "servo_hip_angle": 90,
+        "servo_shoulder_angle": 90,
+        "servo_offset_hip": 0.0,        # offset to correct servo zeroing (deg)
+        "servo_offset_shoulder": 0.0,  # offset to correct servo zeroing (deg)
+        "servo_offset_knee": 0.0,        # offset to correct servo zeroing (deg)
+        "x": 0.0,
+        "y": -LRL_L1,
+        "z": LRL_L2 + LRL_L3,
+    },
+    
+    "safety_limits": {
+        "knee": {"min": 90.0, "max": 180.0},       # IK joint angle limits (deg)
+        "hip": {"min": -60.0, "max": 60.0},
+        "shoulder": {"min": 70.0, "max": 110.0},
+    },
+}
+
+# Right front leg link lengths (mm)
+RFL_L1 = 40.0    # hip offset — lateral distance from hip pivot to shoulder pivot
+RFL_L2 = 120.0   # upper leg length
+RFL_L3 = 120.0   # lower leg length
+
+RIGHT_FRONT_LEG = {
+    "link_lengths": {
+        "l1": RFL_L1,
+        "l2": RFL_L2,
+        "l3": RFL_L3,
+    },
+    "servos": {
+        "hip": {
+            "channel": 1,
+            "min_pulse": 500,
+            "max_pulse": 2500,
+            "min_angle": 0.0,
+            "max_angle": 270.0,
+        },
+        "shoulder": {
+            "channel": 2,
+            "min_pulse": 500,
+            "max_pulse": 2500,
+            "min_angle": 0.0,
+            "max_angle": 270.0,
+        },
+        "knee": {
+            "channel": 0,
+            "min_pulse": 500,
+            "max_pulse": 2500,
+            "min_angle": 0.0,
+            "max_angle": 270.0,
+        },
+    },
+    "driver_address": 0x42,
+
+    "initialization": {
+        "servo_knee_angle": 180,
+        "servo_hip_angle": 90,
+        "servo_shoulder_angle": 90,
+        "servo_offset_hip": 0.0,        # offset to correct servo zeroing (deg)
+        "servo_offset_shoulder": 0.0,    # offset to correct servo zeroing (deg)
+        "servo_offset_knee": 0.0,        # offset to correct servo zeroing (deg)
+        "x": 0.0,
+        "y": RFL_L1,
+        "z": RFL_L2 + RFL_L3,
+    },
+    
+    "safety_limits": {
+        "knee": {"min": 90.0, "max": 180.0},       # IK joint angle limits (deg)
+        "hip": {"min": -60.0, "max": 60.0},
+        "shoulder": {"min": 70.0, "max": 110.0},
+    },
+}
+
+# Right rear leg link lengths (mm)
+RRL_L1 = 40.0    # hip offset — lateral distance from hip pivot to shoulder pivot
+RRL_L2 = 120.0   # upper leg length
+RRL_L3 = 120.0   # lower leg length
+
+RIGHT_REAR_LEG = {
+    "link_lengths": {
+        "l1": RRL_L1,
+        "l2": RRL_L2,
+        "l3": RRL_L3,
+    },
+    "servos": {
+        "hip": {
+            "channel": 1,
+            "min_pulse": 500,
+            "max_pulse": 2500,
+            "min_angle": 0.0,
+            "max_angle": 270.0,
+        },
+        "shoulder": {
+            "channel": 2,
+            "min_pulse": 500,
+            "max_pulse": 2500,
+            "min_angle": 0.0,
+            "max_angle": 270.0,
+        },
+        "knee": {
+            "channel": 0,
+            "min_pulse": 500,
+            "max_pulse": 2500,
+            "min_angle": 0.0,
+            "max_angle": 270.0,
+        },
+    },
+    "driver_address": 0x43,
+
+    "initialization": {
+        "servo_knee_angle": 180,
+        "servo_hip_angle": 90,
+        "servo_shoulder_angle": 90,
+        "servo_offset_hip": 0.0,        # offset to correct servo zeroing (deg)
+        "servo_offset_shoulder": 0.0,    # offset to correct servo zeroing (deg)
+        "servo_offset_knee": 0.0,        # offset to correct servo zeroing (deg)
+        "x": 0.0,
+        "y": RRL_L1,
+        "z": RRL_L2 + RRL_L3,
+    },
+    
+    "safety_limits": {
+        "knee": {"min": 90.0, "max": 180.0},       # IK joint angle limits (deg)
+        "hip": {"min": -60.0, "max": 60.0},
+        "shoulder": {"min": 70.0, "max": 110.0},
+    },
+}
