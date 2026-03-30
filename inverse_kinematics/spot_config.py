@@ -75,7 +75,7 @@ LEFT_FRONT_LEG = {
         "servo_offset_knee": 0.0,        # offset to correct servo zeroing (deg)
         "x": 0.0,
         "y": -LFL_L1,
-        "z": LFL_L2 + LFL_L3 - 10,
+        "z": LFL_L2 + LFL_L3 - 1,
     },
     
     "safety_limits": {
@@ -130,7 +130,7 @@ LEFT_REAR_LEG = {
         "servo_offset_knee": 0.0,        # offset to correct servo zeroing (deg)
         "x": 0.0,
         "y": -LRL_L1,
-        "z": LRL_L2 + LRL_L3 - 10,
+        "z": LRL_L2 + LRL_L3 - 1,
     },
     
     "safety_limits": {
@@ -185,7 +185,7 @@ RIGHT_FRONT_LEG = {
         "servo_offset_knee": 0.0,        # offset to correct servo zeroing (deg)
         "x": 0.0,
         "y": RFL_L1,
-        "z": RFL_L2 + RFL_L3 - 10,
+        "z": RFL_L2 + RFL_L3 - 1,
     },
     
     "safety_limits": {
@@ -240,7 +240,7 @@ RIGHT_REAR_LEG = {
         "servo_offset_knee": 0.0,        # offset to correct servo zeroing (deg)
         "x": 0.0,
         "y": RRL_L1,
-        "z": RRL_L2 + RRL_L3 - 10,
+        "z": RRL_L2 + RRL_L3 - 1,
     },
     
     "safety_limits": {
