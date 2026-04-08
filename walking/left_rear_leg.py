@@ -1,27 +1,27 @@
 # Written by team Tailenders (Atharva Sunder, Kausik Kolluri, Jash Lapsiwala, Aryan Chandra, Raymond Cao)
 # with assistance from Claude Opus 4.6
-# Date: 19th March 2026
+# Date: 28th March 2026
 
 """
-Left front leg for the Spot Micro quadruped.
+Left rear leg for the Spot Micro quadruped.
 
 Inherits from the abstract Leg base class and implements the
 inverse kinematics and joint-to-motor angle conversion specific
-to the left front leg's geometry and servo orientation.
+to the left rear leg's geometry and servo orientation.
 """
 
 import math
 
 from leg import Leg
 from servo import Servo
-from spot_config import LEFT_FRONT_LEG
+from spot_config import LEFT_REAR_LEG
 
 
-class LeftFrontLeg(Leg):
+class LeftRearLeg(Leg):
 
     def __init__(self, pca):
         """
-        Initialize the LeftFrontLeg.
+        Initialize the LeftRearLeg.
 
         Loads configuration from config/leg_config.py and passes it,
         along with the PCA9685 driver, to the parent Leg class.
@@ -32,7 +32,7 @@ class LeftFrontLeg(Leg):
         pca : adafruit_pca9685.PCA9685
             The PCA9685 driver object controlling this leg's servos.
         """
-        super().__init__(pca, LEFT_FRONT_LEG)
+        super().__init__(pca, LEFT_REAR_LEG)
 
         servo_cfg = self.config["servos"]
         init_cfg = self.config["initialization"]
@@ -107,15 +107,15 @@ class LeftFrontLeg(Leg):
         """
         init_cfg = self.config["initialization"]
 
-        self.hip_servo.command(init_cfg["servo_hip_angle"]) 
+        self.hip_servo.command(init_cfg["servo_hip_angle"])
         self.shoulder_servo.command(init_cfg["servo_shoulder_angle"])
-        self.knee_servo.command(init_cfg["servo_knee_angle"] + self.offset_knee)
+        self.knee_servo.command(init_cfg["servo_knee_angle"])
 
     def compute_ik(self, x, y, z):
         """
-        Compute inverse kinematics for the left front leg.
+        Compute inverse kinematics for the left rear leg.
 
-        Given a target foot position in the left front leg's local
+        Given a target foot position in the left rear leg's local
         coordinate frame, compute the required joint angles using
         3-DOF geometric IK (hip abduction + shoulder/knee in the
         sagittal plane).
@@ -183,9 +183,9 @@ class LeftFrontLeg(Leg):
 
     def joint_angles_to_motor_angles(self, theta_hip, theta_shoulder, theta_knee):
         """
-        Convert IK joint angles to servo motor angles for the left front leg.
+        Convert IK joint angles to servo motor angles for the left rear leg.
 
-        Applies left-front-specific offsets, sign flips, and mechanical
+        Applies left-rear-specific offsets, sign flips, and mechanical
         zero adjustments so that the computed IK angles map correctly
         to the physical servo positions.
 
@@ -212,7 +212,7 @@ class LeftFrontLeg(Leg):
 
     def motor_angles_to_joint_angles(self, motor_hip, motor_shoulder, motor_knee):
         """
-        Convert servo motor angles back to IK joint angles for the left front leg.
+        Convert servo motor angles back to IK joint angles for the left rear leg.
 
         This is the inverse of joint_angles_to_motor_angles.
 

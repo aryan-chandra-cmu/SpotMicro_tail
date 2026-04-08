@@ -86,9 +86,9 @@ LEFT_FRONT_LEG = {
 }
 
 # Left rear leg link lengths (mm)
-LRL_L1 = 40.0    # hip offset — lateral distance from hip pivot to shoulder pivot
-LRL_L2 = 120.0   # upper leg length
-LRL_L3 = 120.0   # lower leg length
+LRL_L1 = LFL_L1    # hip offset — lateral distance from hip pivot to shoulder pivot
+LRL_L2 = LFL_L2   # upper leg length
+LRL_L3 = LFL_L3   # lower leg length
 
 LEFT_REAR_LEG = {
     "link_lengths": {
@@ -141,9 +141,9 @@ LEFT_REAR_LEG = {
 }
 
 # Right front leg link lengths (mm)
-RFL_L1 = 40.0    # hip offset — lateral distance from hip pivot to shoulder pivot
-RFL_L2 = 120.0   # upper leg length
-RFL_L3 = 120.0   # lower leg length
+RFL_L1 = LFL_L1    # hip offset — lateral distance from hip pivot to shoulder pivot
+RFL_L2 = LFL_L2   # upper leg length
+RFL_L3 = LFL_L3   # lower leg length
 
 RIGHT_FRONT_LEG = {
     "link_lengths": {
@@ -196,9 +196,9 @@ RIGHT_FRONT_LEG = {
 }
 
 # Right rear leg link lengths (mm)
-RRL_L1 = 40.0    # hip offset — lateral distance from hip pivot to shoulder pivot
-RRL_L2 = 120.0   # upper leg length
-RRL_L3 = 120.0   # lower leg length
+RRL_L1 = LFL_L1    # hip offset — lateral distance from hip pivot to shoulder pivot
+RRL_L2 = LFL_L2   # upper leg length
+RRL_L3 = LFL_L3   # lower leg length
 
 RIGHT_REAR_LEG = {
     "link_lengths": {
@@ -291,5 +291,33 @@ TAIL = {
     "safety_limits": {
         "left":  {"min": 45.0, "max": 225.0},   # servo angle limits (deg)
         "right": {"min": 45.0, "max": 225.0},
+    },
+}
+
+# ============================================================================
+# WALKING CONFIGURATION
+# ============================================================================
+
+WALKING_PARAMS = {
+    "step_duration": 1.0,
+    "left_front": {
+        "step_height": 10.0,  
+        "y_offset": -RFL_L1,
+        "ground_z": 160.0,
+    },
+    "right_front": {
+        "step_height": 10.0,
+        "y_offset": RFL_L1,
+        "ground_z": 160.0,
+    },
+    "left_rear": {
+        "step_height": 10.0,
+        "y_offset": -LRL_L1,
+        "ground_z": 160.0,
+    },
+    "right_rear": {
+        "step_height": 10.0,
+        "y_offset": RRL_L1,
+        "ground_z": 160.0,
     },
 }
