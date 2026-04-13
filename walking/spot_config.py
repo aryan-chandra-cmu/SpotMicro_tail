@@ -43,28 +43,28 @@ LEFT_FRONT_LEG = {
     },
     "servos": {
         "hip": {
-            "channel": 14,
+            "channel": 1,
             "min_pulse": 500,
             "max_pulse": 2500,
             "min_angle": 0.0,
             "max_angle": 270.0,
         },
         "shoulder": {
-            "channel": 15,
+            "channel": 0,
             "min_pulse": 500,
             "max_pulse": 2500,
             "min_angle": 0.0,
             "max_angle": 270.0,
         },
         "knee": {
-            "channel": 13,
+            "channel": 2,
             "min_pulse": 500,
             "max_pulse": 2500,
             "min_angle": 0.0,
             "max_angle": 270.0,
         },
     },
-    "driver_address": 0x44,
+    "driver_address": 0x41,
 
     "initialization": {
         "servo_knee_angle": 180,    # modify to ensure leg is straight
@@ -98,21 +98,21 @@ LEFT_REAR_LEG = {
     },
     "servos": {
         "hip": {
-            "channel": 14,
+            "channel": 1,
             "min_pulse": 500,
             "max_pulse": 2500,
             "min_angle": 0.0,
             "max_angle": 270.0,
         },
         "shoulder": {
-            "channel": 15,
+            "channel": 0,
             "min_pulse": 500,
             "max_pulse": 2500,
             "min_angle": 0.0,
             "max_angle": 270.0,
         },
         "knee": {
-            "channel": 13,
+            "channel": 2,
             "min_pulse": 500,
             "max_pulse": 2500,
             "min_angle": 0.0,
@@ -153,28 +153,28 @@ RIGHT_FRONT_LEG = {
     },
     "servos": {
         "hip": {
-            "channel": 14,
+            "channel": 1,
             "min_pulse": 500,
             "max_pulse": 2500,
             "min_angle": 0.0,
             "max_angle": 270.0,
         },
         "shoulder": {
-            "channel": 15,
+            "channel": 0,
             "min_pulse": 500,
             "max_pulse": 2500,
             "min_angle": 0.0,
             "max_angle": 270.0,
         },
         "knee": {
-            "channel": 13,
+            "channel": 2,
             "min_pulse": 500,
             "max_pulse": 2500,
             "min_angle": 0.0,
             "max_angle": 270.0,
         },
     },
-    "driver_address": 0x41,
+    "driver_address": 0x40,
 
     "initialization": {
         "servo_knee_angle": 180,
@@ -229,7 +229,7 @@ RIGHT_REAR_LEG = {
             "max_angle": 270.0,
         },
     },
-    "driver_address": 0x40,
+    "driver_address": 0x44,
 
     "initialization": {
         "servo_knee_angle": 180,
@@ -301,23 +301,23 @@ TAIL = {
 WALKING_PARAMS = {
     "step_duration": 1.0,
     "left_front": {
-        "step_height": 10.0,  
+        "step_height": 20.0,  
         "y_offset": -RFL_L1,
-        "ground_z": 160.0,
+        "ground_z": 200.0,
     },
     "right_front": {
-        "step_height": 10.0,
+        "step_height": 20.0,
         "y_offset": RFL_L1,
-        "ground_z": 160.0,
+        "ground_z": 200.0,
     },
     "left_rear": {
-        "step_height": 10.0,
+        "step_height": 20.0,
         "y_offset": -LRL_L1,
-        "ground_z": 160.0,
+        "ground_z": 200.0,
     },
     "right_rear": {
-        "step_height": 10.0,
+        "step_height": 20.0,
         "y_offset": RRL_L1,
-        "ground_z": 160.0,
+        "ground_z": 200.0,
     },
 }

@@ -167,7 +167,7 @@ def main():
 
     # --- Instantiate Trot controller ---
     trot = Trot()
-    current_forward_speed = 0.0
+    current_forward_speed = 60.0
 
     # --- Simulation parameters ---
     total_time = 10.0   # seconds

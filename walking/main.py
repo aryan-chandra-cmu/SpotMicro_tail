@@ -153,11 +153,11 @@ def main():
 
     # --- Gait Controller ---
     trot = Trot()
-    current_forward_speed = 0.0
+    current_forward_speed = 60.0    # mm/s
 
     # --- Control loop ---
     print("Starting gait control loop...")
-    total_time = 10.0   # total run time in seconds
+    total_time = 30.0   # total run time in seconds
     num_steps = int(total_time / dt)
     t = 0.0
 

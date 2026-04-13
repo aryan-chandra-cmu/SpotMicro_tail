@@ -49,7 +49,7 @@ class Trot:
             x = -(dynamic_step_length / 2.0) * np.cos(s * np.pi)
             
             # z follows a smooth sine wave arc
-            z = ground_z + step_height * np.sin(s * np.pi)
+            z = ground_z - step_height * np.sin(s * np.pi)
             
         else:
             # =========================
